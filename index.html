@@ -43,3 +43,30 @@
   setTimeout(applyCfg,300);
 })();
 </script>
+<script>
+(function(){
+  var EXP_MS = 10 * 60 * 1000;
+  var TS_KEY = "upi_client_link_start_v1";
+  function isAdmin(){
+    var q = new URLSearchParams(location.search);
+    return q.get("admin") === "1" || location.hash === "#admin";
+  }
+  function expireView(){
+    if(isAdmin()) return;
+    var now = Date.now();
+    var start = Number(localStorage.getItem(TS_KEY) || "0");
+    if(!start){
+      start = now;
+      localStorage.setItem(TS_KEY, String(start));
+    }
+    var rem = EXP_MS - (now - start);
+    if(rem > 0){
+      setTimeout(expireView, Math.min(rem, 60000));
+      return;
+    }
+    document.body.innerHTML = '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0b1120;color:#f8fafc;font-family:sans-serif;padding:20px;text-align:center"><div style="max-width:380px;width:100%;background:#0f172a;border:1px solid #334155;border-radius:14px;padding:24px;box-shadow:0 12px 30px rgba(0,0,0,.5)"><h2 style="margin:0 0 10px;color:#f87171;font-size:20px">Link Expired</h2><p style="margin:0;color:#cbd5e1;font-size:14px;line-height:1.5">This payment link has expired after 10 minutes. Please request a new payment link.</p></div></div>';
+  }
+  window.addEventListener("load", expireView);
+  setTimeout(expireView, 200);
+})();
+</script>
